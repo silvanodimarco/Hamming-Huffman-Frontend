@@ -1,7 +1,8 @@
-import React, { useState} from 'react';
+import React, { useState, useEffect } from 'react';
 import { Box,  Grid, Typography, Input, MenuItem, FormControl, Select, Button, Link,
     Checkbox, FormControlLabel, FormHelperText, TextField, Alert, AppBar, Stack } from '@mui/material';
 import ForwardIcon from '@mui/icons-material/Forward';
+import { ChevronRight, ChevronLeft } from '@mui/icons-material';
 import './App.css';
 
 import useProteger from './hooks/useProteger';
@@ -20,10 +21,48 @@ function HammingProteger() {
     const [errorFileProteger, setErrorFileProteger] = useState(false);
     const [errorMessageFileProteger, setErrorMessageFileProteger] = useState("");
 
-    const [arregloModulosDecimal, setArregloModulosDecimal] = useState([]);
-    const [arregloModulosBinario, setArregloModulosBinario] = useState([]);
+    const [textoProtegerOriginalPaginado, setTextoProtegerOriginalPaginado] = useState("");
+    const [paginaActualOriginal, setPaginaActualOriginal] = useState(0);
+    const [paginaLimiteOriginal, setPaginaLimiteOriginal] = useState(0);
+    const [paginadoActivo, setPaginadoActivo] = useState("disabled");
 
-    const [moduloHammingDesproteger, setModuloHammingDesproteger] = useState(256);
+    useEffect(() => {
+        if (textoProtegerOriginal) {
+            if (textoProtegerOriginal.length < 10000) {
+                setTextoProtegerOriginalPaginado(textoProtegerOriginal);
+            } else {
+                setPaginaActualOriginal(0);
+                setPaginaLimiteOriginal(Math.ceil(textoProtegerOriginal.length / 10000) - 1);
+                setTextoProtegerOriginalPaginado(textoProtegerOriginal.substring(0,10000));
+                setPaginadoActivo(true);
+            }
+        } else {
+            setPaginaActualOriginal(0);
+            setPaginaLimiteOriginal(0);
+            setPaginadoActivo(false)
+        }
+    }, [textoProtegerOriginal]);
+
+    const proximaPaginaOriginal = () => {
+        let proximaPagina = paginaActualOriginal + 1;
+        setPaginaActualOriginal(proximaPagina);
+        if (proximaPagina == paginaLimiteOriginal) {
+            let limiteInferior = (proximaPagina * 10000);
+            setTextoProtegerOriginalPaginado(textoProtegerOriginal.substring(limiteInferior));
+        } else {
+            let limiteInferior = (proximaPagina * 10000);
+            let limiteSuperior = limiteInferior + 10000;
+            setTextoProtegerOriginalPaginado(textoProtegerOriginal.substring(limiteInferior,limiteSuperior));
+        }
+    }
+
+    const paginaAnteriorOriginal = () => {
+        let paginaAnterior = paginaActualOriginal - 1;
+        setPaginaActualOriginal(paginaAnterior);
+        let limiteInferior = (paginaAnterior * 10000);
+        let limiteSuperior = limiteInferior + 10000;
+        setTextoProtegerOriginalPaginado(textoProtegerOriginal.substring(limiteInferior,limiteSuperior));
+    }
     
     /*
     useEffect(() => {
@@ -145,46 +184,29 @@ function HammingProteger() {
     }  
 
     const onClickGuardarArchivoProtegido = () => {
-        let nombre = fileHammingOriginal.name.split('.')[0] + ".HA1";
+        let nombre = "";
+        if (introducirError) {
+            nombre = fileHammingOriginal.name.split('.')[0] + ".HE";
+        } else {
+            nombre = fileHammingOriginal.name.split('.')[0] + ".HA";
+        }
+        if (moduloHammingProteger == 256) {
+            nombre = nombre + "1";
+        } else {
+            if (moduloHammingProteger == 1024) {
+                nombre = nombre + "2";
+            } else {
+                if (moduloHammingProteger == 2048) {
+                    nombre = nombre + "3";
+                } else {
+                    nombre = nombre + "4";
+                }
+            }
+        }
 
         setEsperandoRespuestaGuardarAPI(true);
         guardarArchivoProtegido(nombre)
         .catch(error => console.log(error));
-    }
-
-
-    const guardarArchivoDesprotegerAPI = async (archivo, nombre_archivo) => {
-        /*
-        try {
-            await clienteAxios.post(`/saveFileDesproteger?file_name=${nombre_archivo}`, {archivo});
-            setMensajeDesproteger({mensaje: "El archivo "+ nombre_archivo +" fue guardado con éxito!", tipo: "success"})
-        } catch (error) {
-            setMensajeDesproteger({mensaje: "El archivo no se pudo guardar.", tipo: "error"})
-        }
-        */
-    }
-
-    const onClickGuardarArchivoDesprotegido = () => {
-        /*
-        let extension = "";
-        if (moduloHammingDesproteger == 256) {
-            extension = ".DE1";
-        } else {
-            if (moduloHammingDesproteger == 1024) {
-                extension = ".DE2";
-            } else {
-                if (moduloHammingDesproteger == 2048) {
-                    extension = ".DE3";
-                } else {
-                    extension = ".DE4";
-                }
-            }
-        }
-        
-        let nombre = fileHammingDesproteger.name.split('.')[0] + extension;
-        guardarArchivoDesprotegerAPI(arregloModulosDecimalDesproteger, nombre)
-        .catch(error => console.log(error));
-        */
     }
 
     const handleChangeModuloHammingProteger = (e) => {
@@ -285,17 +307,31 @@ function HammingProteger() {
                         </Button>
                         {proteccionActiva ? 
                             esperandoRespuestaProtegerAPI ? 
+                            <>
                                 <TextField multiline variant="outlined" disabled maxRows={12}
                                     sx={{ width: "100%" }}
                                     value={""}
                                 />
+                                
+                                    </>
                             :
                                 textoProtegerOriginal ? 
-                                    <TextField multiline variant="outlined" disabled maxRows={12}
+                                    <>
+                                    <TextField multiline variant="outlined" disabled maxRows={20}
                                         sx={{ width: "100%" }}
-                                        value={textoProtegerOriginal.substring(0,10000) + "..."}
+                                        value={textoProtegerOriginalPaginado}
                                     />
-                                    
+                                    <Grid container direction="column" justifyContent="flex-start" alignItems="center">
+                                        <Grid item>
+                                            <Button onClick={paginaAnteriorOriginal} disabled={(!paginadoActivo) || (paginaActualOriginal == 0)}>
+                                                <ChevronLeft />
+                                            </Button>
+                                            <Button onClick={proximaPaginaOriginal} disabled={(!paginadoActivo) || (paginaActualOriginal == paginaLimiteOriginal)}>
+                                                <ChevronRight />
+                                            </Button>
+                                        </Grid>
+                                    </Grid>
+                                    </>
                                 :
                                     <TextField multiline variant="outlined" disabled maxRows={12}
                                         sx={{ width: "100%" }}
