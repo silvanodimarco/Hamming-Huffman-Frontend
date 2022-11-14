@@ -24,7 +24,11 @@ function HammingProteger() {
     const [textoProtegerOriginalPaginado, setTextoProtegerOriginalPaginado] = useState("");
     const [paginaActualOriginal, setPaginaActualOriginal] = useState(0);
     const [paginaLimiteOriginal, setPaginaLimiteOriginal] = useState(0);
-    const [paginadoActivo, setPaginadoActivo] = useState("disabled");
+    const [paginadoActivoOriginal, setPaginadoActivoOriginal] = useState(false);
+    const [textoProtegerGeneradoPaginado, setTextoProtegerGeneradoPaginado] = useState("");
+    const [paginaActualGenerado, setPaginaActualGenerado] = useState(0);
+    const [paginaLimiteGenerado, setPaginaLimiteGenerado] = useState(0);
+    const [paginadoActivoGenerado, setPaginadoActivoGenerado] = useState(false);
 
     useEffect(() => {
         if (textoProtegerOriginal) {
@@ -34,12 +38,12 @@ function HammingProteger() {
                 setPaginaActualOriginal(0);
                 setPaginaLimiteOriginal(Math.ceil(textoProtegerOriginal.length / 10000) - 1);
                 setTextoProtegerOriginalPaginado(textoProtegerOriginal.substring(0,10000));
-                setPaginadoActivo(true);
+                setPaginadoActivoOriginal(true);
             }
         } else {
             setPaginaActualOriginal(0);
             setPaginaLimiteOriginal(0);
-            setPaginadoActivo(false)
+            setPaginadoActivoOriginal(false)
         }
     }, [textoProtegerOriginal]);
 
@@ -62,6 +66,44 @@ function HammingProteger() {
         let limiteInferior = (paginaAnterior * 10000);
         let limiteSuperior = limiteInferior + 10000;
         setTextoProtegerOriginalPaginado(textoProtegerOriginal.substring(limiteInferior,limiteSuperior));
+    }
+
+    useEffect(() => {
+        if (textoProtegerGenerado) {
+            if (textoProtegerGenerado.length < 10000) {
+                setTextoProtegerGeneradoPaginado(textoProtegerGenerado);
+            } else {
+                setPaginaActualGenerado(0);
+                setPaginaLimiteGenerado(Math.ceil(textoProtegerGenerado.length / 10000) - 1);
+                setTextoProtegerGeneradoPaginado(textoProtegerGenerado.substring(0,10000));
+                setPaginadoActivoGenerado(true);
+            }
+        } else {
+            setPaginaActualGenerado(0);
+            setPaginaLimiteGenerado(0);
+            setPaginadoActivoGenerado(false)
+        }
+    }, [textoProtegerGenerado]);
+
+    const proximaPaginaGenerado = () => {
+        let proximaPagina = paginaActualGenerado + 1;
+        setPaginaActualGenerado(proximaPagina);
+        if (proximaPagina == paginaLimiteGenerado) {
+            let limiteInferior = (proximaPagina * 10000);
+            setTextoProtegerGeneradoPaginado(textoProtegerGenerado.substring(limiteInferior));
+        } else {
+            let limiteInferior = (proximaPagina * 10000);
+            let limiteSuperior = limiteInferior + 10000;
+            setTextoProtegerGeneradoPaginado(textoProtegerGenerado.substring(limiteInferior,limiteSuperior));
+        }
+    }
+
+    const paginaAnteriorGenerado = () => {
+        let paginaAnterior = paginaActualGenerado - 1;
+        setPaginaActualGenerado(paginaAnterior);
+        let limiteInferior = (paginaAnterior * 10000);
+        let limiteSuperior = limiteInferior + 10000;
+        setTextoProtegerGeneradoPaginado(textoProtegerGenerado.substring(limiteInferior,limiteSuperior));
     }
     
     /*
@@ -234,15 +276,7 @@ function HammingProteger() {
             <Grid container spacing={2}>
                 <Grid item xs={12}>
                     <Typography variant="h4" color="primary" sx={{textAlign: 'center'}}>
-                        <b>PROTEGER</b>
-                    </Typography>
-                </Grid>
-                <Grid item xs={12}>
-                    <Typography variant="h6">
-                        <b>Hamming</b>
-                    </Typography>
-                    <Typography variant="body1">
-                        Breve descripción de el método de hamming...
+                        <b>HAMMING (Proteger)</b>
                     </Typography>
                 </Grid>
                 <Grid item xs={12}>
@@ -307,13 +341,10 @@ function HammingProteger() {
                         </Button>
                         {proteccionActiva ? 
                             esperandoRespuestaProtegerAPI ? 
-                            <>
                                 <TextField multiline variant="outlined" disabled maxRows={12}
                                     sx={{ width: "100%" }}
                                     value={""}
                                 />
-                                
-                                    </>
                             :
                                 textoProtegerOriginal ? 
                                     <>
@@ -323,10 +354,10 @@ function HammingProteger() {
                                     />
                                     <Grid container direction="column" justifyContent="flex-start" alignItems="center">
                                         <Grid item>
-                                            <Button onClick={paginaAnteriorOriginal} disabled={(!paginadoActivo) || (paginaActualOriginal == 0)}>
+                                            <Button onClick={paginaAnteriorOriginal} disabled={(!paginadoActivoOriginal) || (paginaActualOriginal == 0)}>
                                                 <ChevronLeft />
                                             </Button>
-                                            <Button onClick={proximaPaginaOriginal} disabled={(!paginadoActivo) || (paginaActualOriginal == paginaLimiteOriginal)}>
+                                            <Button onClick={proximaPaginaOriginal} disabled={(!paginadoActivoOriginal) || (paginaActualOriginal == paginaLimiteOriginal)}>
                                                 <ChevronRight />
                                             </Button>
                                         </Grid>
@@ -363,11 +394,22 @@ function HammingProteger() {
                                 />
                             :
                                 textoProtegerGenerado ? 
-                                    <TextField multiline variant="outlined" disabled maxRows={12}
+                                    <>
+                                    <TextField multiline variant="outlined" disabled maxRows={20}
                                         sx={{ width: "100%" }}
-                                        value={textoProtegerGenerado.substring(0,10000) + "..."}
+                                        value={textoProtegerGeneradoPaginado}
                                     />
-                                    
+                                    <Grid container direction="column" justifyContent="flex-start" alignItems="center">
+                                        <Grid item>
+                                            <Button onClick={paginaAnteriorGenerado} disabled={(!paginadoActivoGenerado) || (paginaActualGenerado == 0)}>
+                                                <ChevronLeft />
+                                            </Button>
+                                            <Button onClick={proximaPaginaGenerado} disabled={(!paginadoActivoGenerado) || (paginaActualGenerado == paginaLimiteGenerado)}>
+                                                <ChevronRight />
+                                            </Button>
+                                        </Grid>
+                                    </Grid>
+                                    </>
                                 :
                                     <TextField multiline variant="outlined" disabled maxRows={12}
                                         sx={{ width: "100%" }}

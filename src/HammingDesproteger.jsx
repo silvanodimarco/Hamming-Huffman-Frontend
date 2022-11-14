@@ -1,7 +1,8 @@
-import React, { useState} from 'react';
+import React, { useState, useEffect } from 'react';
 import { Box, Grid, Typography, Input, MenuItem, FormControl, Select, Button, AppBar,
     Checkbox, FormControlLabel, FormHelperText, TextField, Alert, Stack, Link } from '@mui/material';
 import ForwardIcon from '@mui/icons-material/Forward';
+import { ChevronRight, ChevronLeft } from '@mui/icons-material';
 import './App.css';
 
 import useDesproteger from './hooks/useDesproteger';
@@ -18,6 +19,92 @@ function HammingDesproteger() {
 
     const [errorFileDesproteger, setErrorFileDesproteger] = useState(false);
     const [errorMessageFileDesproteger, setErrorMessageFileDesproteger] = useState("");
+
+    const [textoDesprotegerOriginalPaginado, setTextoDesprotegerOriginalPaginado] = useState("");
+    const [paginaActualOriginal, setPaginaActualOriginal] = useState(0);
+    const [paginaLimiteOriginal, setPaginaLimiteOriginal] = useState(0);
+    const [paginadoActivoOriginal, setPaginadoActivoOriginal] = useState(false);
+
+    const [textoDesprotegerGeneradoPaginado, setTextoDesprotegerGeneradoPaginado] = useState("");
+    const [paginaActualGenerado, setPaginaActualGenerado] = useState(0);
+    const [paginaLimiteGenerado, setPaginaLimiteGenerado] = useState(0);
+    const [paginadoActivoGenerado, setPaginadoActivoGenerado] = useState(false);
+
+    useEffect(() => {
+        if (textoDesprotegerOriginal) {
+            if (textoDesprotegerOriginal.length < 10000) {
+                setTextoDesprotegerOriginalPaginado(textoDesprotegerOriginal);
+            } else {
+                setPaginaActualOriginal(0);
+                setPaginaLimiteOriginal(Math.ceil(textoDesprotegerOriginal.length / 10000) - 1);
+                setTextoDesprotegerOriginalPaginado(textoDesprotegerOriginal.substring(0,10000));
+                setPaginadoActivoOriginal(true);
+            }
+        } else {
+            setPaginaActualOriginal(0);
+            setPaginaLimiteOriginal(0);
+            setPaginadoActivoOriginal(false)
+        }
+    }, [textoDesprotegerOriginal]);
+
+    const proximaPaginaOriginal = () => {
+        let proximaPagina = paginaActualOriginal + 1;
+        setPaginaActualOriginal(proximaPagina);
+        if (proximaPagina == paginaLimiteOriginal) {
+            let limiteInferior = (proximaPagina * 10000);
+            setTextoDesprotegerOriginalPaginado(textoDesprotegerOriginal.substring(limiteInferior));
+        } else {
+            let limiteInferior = (proximaPagina * 10000);
+            let limiteSuperior = limiteInferior + 10000;
+            setTextoDesprotegerOriginalPaginado(textoDesprotegerOriginal.substring(limiteInferior,limiteSuperior));
+        }
+    }
+
+    const paginaAnteriorOriginal = () => {
+        let paginaAnterior = paginaActualOriginal - 1;
+        setPaginaActualOriginal(paginaAnterior);
+        let limiteInferior = (paginaAnterior * 10000);
+        let limiteSuperior = limiteInferior + 10000;
+        setTextoDesprotegerOriginalPaginado(textoDesprotegerOriginal.substring(limiteInferior,limiteSuperior));
+    }
+
+    useEffect(() => {
+        if (textoDesprotegerGenerado) {
+            if (textoDesprotegerGenerado.length < 10000) {
+                setTextoDesprotegerGeneradoPaginado(textoDesprotegerGenerado);
+            } else {
+                setPaginaActualGenerado(0);
+                setPaginaLimiteGenerado(Math.ceil(textoDesprotegerGenerado.length / 10000) - 1);
+                setTextoDesprotegerGeneradoPaginado(textoDesprotegerGenerado.substring(0,10000));
+                setPaginadoActivoGenerado(true);
+            }
+        } else {
+            setPaginaActualGenerado(0);
+            setPaginaLimiteGenerado(0);
+            setPaginadoActivoGenerado(false)
+        }
+    }, [textoDesprotegerGenerado]);
+
+    const proximaPaginaGenerado = () => {
+        let proximaPagina = paginaActualGenerado + 1;
+        setPaginaActualGenerado(proximaPagina);
+        if (proximaPagina == paginaLimiteGenerado) {
+            let limiteInferior = (proximaPagina * 10000);
+            setTextoDesprotegerGeneradoPaginado(textoDesprotegerGenerado.substring(limiteInferior));
+        } else {
+            let limiteInferior = (proximaPagina * 10000);
+            let limiteSuperior = limiteInferior + 10000;
+            setTextoDesprotegerGeneradoPaginado(textoDesprotegerGenerado.substring(limiteInferior,limiteSuperior));
+        }
+    }
+
+    const paginaAnteriorGenerado = () => {
+        let paginaAnterior = paginaActualGenerado - 1;
+        setPaginaActualGenerado(paginaAnterior);
+        let limiteInferior = (paginaAnterior * 10000);
+        let limiteSuperior = limiteInferior + 10000;
+        setTextoDesprotegerGeneradoPaginado(textoDesprotegerGenerado.substring(limiteInferior,limiteSuperior));
+    }
 
     const handleChangeFileHammingDesproteger = (e) => {
         e.preventDefault();
@@ -102,15 +189,7 @@ function HammingDesproteger() {
             <Grid container spacing={2}>
                 <Grid item xs={12}>
                     <Typography variant="h4" color="secondary" sx={{textAlign: 'center'}}>
-                        <b>DESPROTEGER</b>
-                    </Typography>
-                </Grid>
-                <Grid item xs={12}>
-                    <Typography variant="h6">
-                        <b>Hamming</b>
-                    </Typography>
-                    <Typography variant="body1">
-                        Breve descripción de el método de hamming...
+                        <b>HAMMING (Desproteger)</b>
                     </Typography>
                 </Grid>
                 <Grid item xs={12}>
@@ -179,17 +258,34 @@ function HammingDesproteger() {
                             Archivo Original
                         </Button>
                         {desproteccionActiva ? 
-                            textoDesprotegerOriginal ? 
+                            esperandoRespuestaDesproteger ? 
                                 <TextField multiline variant="outlined" disabled maxRows={12}
                                     sx={{ width: "100%" }}
-                                    value={textoDesprotegerOriginal.substring(0,10000) + "..."}
+                                    value={""}
                                 />
-                                
                             :
-                                <TextField multiline variant="outlined" disabled maxRows={12}
-                                    sx={{ width: "100%" }}
-                                    value={"Procesando texto original..."}
-                                />
+                                textoDesprotegerOriginal ? 
+                                    <>
+                                    <TextField multiline variant="outlined" disabled maxRows={20}
+                                        sx={{ width: "100%" }}
+                                        value={textoDesprotegerOriginalPaginado}
+                                    />
+                                    <Grid container direction="column" justifyContent="flex-start" alignItems="center">
+                                        <Grid item>
+                                            <Button color="secondary" onClick={paginaAnteriorOriginal} disabled={(!paginadoActivoOriginal) || (paginaActualOriginal == 0)}>
+                                                <ChevronLeft />
+                                            </Button>
+                                            <Button color="secondary" onClick={proximaPaginaOriginal} disabled={(!paginadoActivoOriginal) || (paginaActualOriginal == paginaLimiteOriginal)}>
+                                                <ChevronRight />
+                                            </Button>
+                                        </Grid>
+                                    </Grid>
+                                    </>
+                                :
+                                    <TextField multiline variant="outlined" disabled maxRows={12}
+                                        sx={{ width: "100%" }}
+                                        value={"Procesando texto original..."}
+                                    />
                         :
                             <TextField multiline variant="outlined" disabled maxRows={12}
                                 sx={{ width: "100%" }}
@@ -209,17 +305,34 @@ function HammingDesproteger() {
                             Archivo Generado
                         </Button>
                         {desproteccionActiva ? 
-                            textoDesprotegerGenerado ? 
+                            esperandoRespuestaDesproteger ? 
                                 <TextField multiline variant="outlined" disabled maxRows={12}
                                     sx={{ width: "100%" }}
-                                    value={textoDesprotegerGenerado.substring(0,10000) + "..."}
+                                    value={""}
                                 />
-                                
                             :
-                                <TextField multiline variant="outlined" disabled maxRows={12}
-                                    sx={{ width: "100%" }}
-                                    value={"Procesando texto generado..."}
-                                />
+                                textoDesprotegerGenerado ? 
+                                    <>
+                                    <TextField multiline variant="outlined" disabled maxRows={20}
+                                        sx={{ width: "100%" }}
+                                        value={textoDesprotegerGeneradoPaginado}
+                                    />
+                                    <Grid container direction="column" justifyContent="flex-start" alignItems="center">
+                                        <Grid item>
+                                            <Button color="secondary" onClick={paginaAnteriorGenerado} disabled={(!paginadoActivoGenerado) || (paginaActualGenerado == 0)}>
+                                                <ChevronLeft />
+                                            </Button>
+                                            <Button color="secondary" onClick={proximaPaginaGenerado} disabled={(!paginadoActivoGenerado) || (paginaActualGenerado == paginaLimiteGenerado)}>
+                                                <ChevronRight />
+                                            </Button>
+                                        </Grid>
+                                    </Grid>
+                                    </>
+                                :
+                                    <TextField multiline variant="outlined" disabled maxRows={12}
+                                        sx={{ width: "100%" }}
+                                        value={"Procesando texto..."}
+                                    />
                         :
                             <TextField multiline variant="outlined" disabled maxRows={12}
                                 sx={{ width: "100%" }}
