@@ -182,6 +182,16 @@ function HammingDesproteger() {
                     <Button color="inherit">
                         DESPROTEGER
                     </Button>
+                    <Button color="inherit">
+                        <Link href="/huffman/compactar" underline="none" color="inherit">
+                            COMPACTAR
+                        </Link>
+                    </Button>
+                    <Button color="inherit">
+                        <Link href="/huffman/descompactar" underline="none" color="inherit">
+                            DESCOMPACTAR
+                        </Link>
+                    </Button>
                 </Stack>
             </AppBar>
         </Box>
