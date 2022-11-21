@@ -15,11 +15,11 @@ const DescompactarProvider = ({children}) =>  {
     const descompactarArchivo = async (archivo) => {
         try {
             // 'archivo' es el nombre del archivo con la extensión .txt
-            const nombre_archivo = archivo.name.split('.')[0]; // en esta línea le saco la extensión y mando sólo el nombre a la API
+            const nombre_archivo = archivo.name;
             const respuesta = await clienteAxios2.post('/decompressHuffman', {file_name: nombre_archivo});
             setDescompactacionActiva(true);
             setEsperandoRespuestaDescompactarAPI(false);
-            setMensajeDescompactar({mensaje: `Se aplicó Huffman para descompactar el archivo ${nombre_archivo}. La API tardó ${respuesta.data.time/1000} segundos.`, tipo: "info"});
+            setMensajeDescompactar({mensaje: `Se aplicó Huffman para descompactar el archivo ${nombre_archivo}. La API tardó ${respuesta.data.time_elapsed/1000} segundos.`, tipo: "info"});
         } catch (error) {
             setEsperandoRespuestaDescompactarAPI(false);
             setMensajeDescompactar({mensaje: "El archivo no pudo ser compactado.", tipo: "error"});

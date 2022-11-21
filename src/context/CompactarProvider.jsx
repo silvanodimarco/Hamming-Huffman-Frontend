@@ -15,8 +15,8 @@ const CompactarProvider = ({children}) =>  {
     const compactarArchivo = async (archivo) => {
         try {
             // 'archivo' es el nombre del archivo con la extensión .txt
-            const nombre_archivo = archivo.name.split('.')[0]; // en esta línea le saco la extensión y mando sólo el nombre a la API
-            const respuesta = await clienteAxios2.post('/compressHuffman', {file_name: nombre_archivo});
+             const nombre_archivo = archivo.name;
+             const respuesta = await clienteAxios2.post('/compressHuffman', {file_name: nombre_archivo});
             setCompactacionActiva(true);
             setEsperandoRespuestaCompactarAPI(false);
             setMensajeCompactar({mensaje: `Se aplicó Huffman para compactar el archivo ${nombre_archivo}. La API tardó ${respuesta.data.time_elapsed/1000} segundos y el porcentaje de compresión fue ${respuesta.data.compress_percent*100}%.`, tipo: "info"});
