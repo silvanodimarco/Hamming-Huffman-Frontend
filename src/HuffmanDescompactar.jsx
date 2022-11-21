@@ -127,8 +127,8 @@ function HuffmanDescompactar() {
         }
         
         let extension = fileHuffmanOriginal.name.split('.').pop();
-        if (extension !== "txt") {
-            setErrorMessageFileDescompactar("El archivo seleccionado debe tener extensión '.txt'.");
+        if (extension !== "HUF") {
+            setErrorMessageFileDescompactar("El archivo seleccionado debe tener extensión '.HUF'.");
             setErrorFileDescompactar(true);
             return
         } else {
